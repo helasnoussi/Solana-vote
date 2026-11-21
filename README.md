@@ -1,6 +1,7 @@
 # SolanaVote — Decentralized Voting Platform
 
-A transparent, on-chain voting program built with **Rust + Anchor** and deployed on **Solana Devnet**.
+A transparent, on-chain voting dApp: a **Rust + Anchor** program deployed on **Solana Devnet** and a
+**React + TypeScript** frontend.
 An administrator creates a poll with several options and a deadline; any wallet can vote **once per poll**;
 results are stored on-chain and can be read by anyone without trusting a central server.
 
@@ -11,6 +12,8 @@ results are stored on-chain and can be read by anyone without trusting a central
 | **Framework** | Anchor 1.2.2 · Solana CLI 4.1.2 · Rust 1.89 |
 | **IDL** | Published on-chain (Program Metadata) |
 | **Tests** | 18 passing (LiteSVM) |
+| **security.txt** | Embedded in the program ([SECURITY.md](SECURITY.md)) |
+| **Frontend** | React 19 · TypeScript · Vite · Tailwind CSS · `@solana/kit` · Wallet Standard |
 
 ---
 
@@ -24,8 +27,9 @@ results are stored on-chain and can be read by anyone without trusting a central
 6. [Design choices and limitations](#design-choices-and-limitations)
 7. [Project structure](#project-structure)
 8. [Getting started](#getting-started)
-9. [Tests](#tests)
-10. [Roadmap](#roadmap)
+9. [Frontend](#frontend)
+10. [Tests](#tests)
+11. [Roadmap](#roadmap)
 
 ---
 
@@ -40,7 +44,8 @@ results are stored on-chain and can be read by anyone without trusting a central
 | Early closing, restricted to the poll creator | ✅ |
 | Automatic refusal of votes after the deadline | ✅ |
 | Deployment on Devnet | ✅ |
-| React frontend (wallet connection, create, vote, results) | 🚧 in progress |
+| `security.txt` embedded in the program | ✅ |
+| React frontend: wallet connection, create, vote, results chart, voting history | ✅ implemented — end-to-end wallet testing in progress |
 
 ---
 
@@ -223,7 +228,18 @@ solana-vote/
 │       ├── test_create_poll.rs
 │       ├── test_vote.rs
 │       └── test_close_poll.rs
-├── app/                            # frontend (in progress)
+├── app/                            # React frontend
+│   ├── index.html
+│   ├── vite.config.ts
+│   ├── scripts/generate-client.mjs # IDL -> TypeScript client (Codama)
+│   └── src/
+│       ├── client.ts               # Kit client: RPC + Wallet Standard signer
+│       ├── hooks.ts                # data fetching (SWR) + transaction sending
+│       ├── lib/                    # poll queries, error messages, helpers
+│       ├── components/             # wallet button, poll card, results chart…
+│       ├── pages/                  # Dashboard, Explore, Create, Poll, My votes
+│       └── generated/              # generated program client (do not edit)
+├── SECURITY.md
 ├── Anchor.toml
 └── Cargo.toml
 ```
@@ -258,6 +274,58 @@ solana program show 6oDhsVkgdj2H7eoR9qQdVAXNm2oCszVWgYQfF5vg6SG7
 
 Redeploying with the same program keypair (`target/deploy/solana_vote-keypair.json`, never committed)
 upgrades the program **at the same address**.
+
+---
+
+## Frontend
+
+A single-page app that talks directly to Solana Devnet — no backend.
+
+### Pages
+
+| Page | What it does |
+|---|---|
+| **Dashboard** | Number of polls, open polls, total votes, latest polls |
+| **Explore** | All polls with an *Open / Ended / Closed* filter |
+| **Create** | Form (title, description, 2–10 options, end date) with the same size limits as the program |
+| **Poll** | Pick an option and vote, see your own vote, live results chart, *Close poll* for the creator, Explorer links |
+| **My votes** | Voting history of the connected wallet |
+
+Every transaction shows a pending state, then a link to Solana Explorer on success, or a readable error
+(already voted, poll closed, voting over, rejected in the wallet, not enough SOL…).
+A permanent **Devnet** badge is displayed in the header.
+
+### How it works
+
+| Concern | Implementation |
+|---|---|
+| Wallet connection | `@solana/kit-plugin-wallet` (Wallet Standard): Phantom, Solflare, Backpack… |
+| RPC + transaction sending | One `@solana/kit` client (`createClient().use(walletSigner(...)).use(solanaRpc(...))`) |
+| Program client | Generated from the Anchor IDL with **Codama** (`npm run codama`): typed instruction builders, account decoders and PDA helpers |
+| Listing polls | `getProgramAccounts` filtered on the `Poll` discriminator (first 8 bytes) |
+| Listing a wallet's votes | `getProgramAccounts` filtered on the `VoteRecord` discriminator + the voter address (offset 40) |
+| Caching / refresh | SWR, refreshed every 15 s and after each transaction |
+| Charts | Recharts |
+
+### Run it
+
+```bash
+cd app
+npm install
+npm run dev          # http://localhost:5173
+```
+
+Set your wallet to **Devnet** (in Phantom: *Settings → Developer settings → Testnet mode → Solana Devnet*)
+and fund it from https://faucet.solana.com.
+
+To use another RPC endpoint, create `app/.env.local` with `VITE_RPC_URL=https://...`.
+
+After changing the program, regenerate the client:
+
+```bash
+anchor build
+cd app && npm run codama
+```
 
 ---
 
@@ -300,7 +368,9 @@ test result: ok. 4 passed  (close_poll)
 - [x] Anchor program: `create_poll`, `vote`, `close_poll`
 - [x] Automated tests for success and failure cases
 - [x] Deployment on Devnet with on-chain IDL
+- [x] `security.txt` embedded in the program
+- [x] React + TypeScript frontend: wallet connection, poll list, create, vote, results chart, voting history
+- [ ] End-to-end test of the frontend with a wallet on Devnet
 - [ ] Demo transactions on Devnet (create a poll, vote with several wallets)
-- [ ] React + TypeScript frontend: wallet connection, poll list, create, vote, results chart
-- [ ] `security.txt` and verified build
-- [ ] Demo video
+- [ ] Screenshots and demo video
+- [ ] Verified build (`solana-verify`, requires a public repository)
