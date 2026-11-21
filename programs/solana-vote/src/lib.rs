@@ -11,6 +11,18 @@ pub use state::*;
 
 declare_id!("6oDhsVkgdj2H7eoR9qQdVAXNm2oCszVWgYQfF5vg6SG7");
 
+// Security contact information embedded in the program binary
+// (read by Solana Explorer). Skipped when the crate is used as a library (CPI).
+#[cfg(not(feature = "no-entrypoint"))]
+solana_security_txt::security_txt! {
+    name: "SolanaVote",
+    project_url: "https://github.com/helasnoussi/Solana-vote",
+    contacts: "link:https://github.com/helasnoussi/Solana-vote/security/advisories/new",
+    policy: "https://github.com/helasnoussi/Solana-vote/blob/main/SECURITY.md",
+    preferred_languages: "en,fr",
+    source_code: "https://github.com/helasnoussi/Solana-vote"
+}
+
 #[program]
 pub mod solana_vote {
     use super::*;
