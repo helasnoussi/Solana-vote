@@ -299,7 +299,7 @@ in the official Docker image, so anyone can rebuild it from this repository and 
 | | |
 |---|---|
 | Build image | `solanafoundation/solana-verifiable-build:4.1.2` |
-| Verified commit | [`125a86c`](https://github.com/helasnoussi/Solana-vote/commit/125a86c35edd64ae3ed6118a78b3119b2a464b67) |
+| Verified commit | [`02d120c`](https://github.com/helasnoussi/Solana-vote/commit/02d120c19f6f7784f32e18d560daebe8e670c9d3) |
 | Program hash | `3ecda4a239e128b9bbe69db1b8d79e2e260bc48fdb220147fa26335e801bfc16` |
 | On-chain verification PDA | [`5QXeye2JL1dBEoPjsmCMqN3bS9ZpdAm5Y7cx3JL1pkY`](https://explorer.solana.com/address/5QXeye2JL1dBEoPjsmCMqN3bS9ZpdAm5Y7cx3JL1pkY?cluster=devnet) (repo URL, commit and build args, written by the upgrade authority) |
 
@@ -312,7 +312,7 @@ solana-verify get-program-hash -u devnet 6oDhsVkgdj2H7eoR9qQdVAXNm2oCszVWgYQfF5v
 # rebuild from GitHub and compare -> "Program hash matches ✅"
 solana-verify verify-from-repo -u devnet \
   --program-id 6oDhsVkgdj2H7eoR9qQdVAXNm2oCszVWgYQfF5vg6SG7 \
-  --commit-hash 125a86c35edd64ae3ed6118a78b3119b2a464b67 \
+  --commit-hash 02d120c19f6f7784f32e18d560daebe8e670c9d3 \
   --library-name solana_vote \
   -b solanafoundation/solana-verifiable-build:4.1.2 \
   https://github.com/helasnoussi/Solana-vote
