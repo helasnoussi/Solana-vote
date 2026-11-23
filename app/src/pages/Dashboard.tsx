@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { usePolls } from '../hooks';
+import { useNow, usePolls } from '../hooks';
 import { pollStatus } from '../lib/polls';
 import { PollCard } from '../components/PollCard';
 import { explorerUrl } from '../client';
@@ -16,7 +16,8 @@ function Stat({ label, value }: { label: string; value: string | number }) {
 
 export function Dashboard() {
   const { data: polls, error, isLoading } = usePolls();
-  const open = polls?.filter((p) => pollStatus(p) === 'open').length ?? 0;
+  const now = useNow();
+  const open = polls?.filter((p) => pollStatus(p, now) === 'open').length ?? 0;
   const votes = polls?.reduce((sum, p) => sum + p.totalVotes, 0n) ?? 0n;
 
   return (

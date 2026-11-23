@@ -1,13 +1,27 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import useSWR, { useSWRConfig } from 'swr';
 import { address, type Address, type Instruction } from '@solana/kit';
 import { useConnectedWallet } from '@solana/kit-plugin-wallet/react';
 import { client } from './client';
-import { fetchAllPolls, fetchVotesOf } from './lib/polls';
+import { fetchAllPolls, fetchVotesOf, nowSeconds } from './lib/polls';
 import { fetchMaybePoll, fetchMaybeVoteRecord, findVoteRecordPda } from './generated';
 import { describeError } from './lib/errors';
 
 const REFRESH_MS = 15_000;
+
+/**
+ * Current unix time in seconds, ticking every `intervalMs`.
+ * Forces a re-render so time-based state (e.g. a poll reaching its end time) updates
+ * even when SWR refetches identical on-chain data and skips re-rendering.
+ */
+export function useNow(intervalMs = 1_000): bigint {
+  const [now, setNow] = useState(nowSeconds);
+  useEffect(() => {
+    const id = setInterval(() => setNow(nowSeconds()), intervalMs);
+    return () => clearInterval(id);
+  }, [intervalMs]);
+  return now;
+}
 
 /** The connected wallet (or null). */
 export const useWallet = () => useConnectedWallet(client);

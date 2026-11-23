@@ -73,9 +73,9 @@ export const nowSeconds = () => BigInt(Math.floor(Date.now() / 1000));
 
 export type PollStatus = 'open' | 'ended' | 'closed';
 
-export function pollStatus(poll: Poll): PollStatus {
+export function pollStatus(poll: Poll, now: bigint = nowSeconds()): PollStatus {
   if (!poll.isActive) return 'closed';
-  if (nowSeconds() >= poll.endTime) return 'ended';
+  if (now >= poll.endTime) return 'ended';
   return 'open';
 }
 

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { address as toAddress, type Address, isAddress } from '@solana/kit';
 import { getClosePollInstruction, getVoteInstructionAsync } from '../generated';
-import { useMyVote, usePoll, useSendInstructions, useWallet, useWalletAddress } from '../hooks';
+import { useMyVote, useNow, usePoll, useSendInstructions, useWallet, useWalletAddress } from '../hooks';
 import { formatDate, percent, pollStatus, shortAddress } from '../lib/polls';
 import { explorerUrl } from '../client';
 import { ResultsChart } from '../components/ResultsChart';
@@ -17,12 +17,13 @@ export function PollPage() {
   const { data: myVote } = useMyVote(pollAddress, useWalletAddress());
   const { state, send } = useSendInstructions();
   const [choice, setChoice] = useState<number | null>(null);
+  const now = useNow();
 
   if (!pollAddress) return <p className="text-rose-400">Invalid poll address.</p>;
   if (isLoading) return <p className="text-slate-400">Loading poll…</p>;
   if (!poll) return <p className="text-rose-400">Poll not found on Devnet.</p>;
 
-  const status = pollStatus(poll);
+  const status = pollStatus(poll, now);
   const isAuthority = wallet?.account.address === poll.authority;
   const canVote = status === 'open' && wallet?.signer && myVote === null;
 
@@ -89,7 +90,7 @@ export function PollPage() {
           <TxStatus state={state} />
         </div>
 
-        {isAuthority && poll.isActive && (
+        {isAuthority && status === 'open' && (
           <div className="card flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="font-semibold">Administration</h2>
@@ -105,7 +106,7 @@ export function PollPage() {
       <aside className="space-y-4 lg:col-span-2">
         <div className="card">
           <h2 className="mb-1 font-semibold">Results</h2>
-          <p className="mb-4 text-sm text-slate-400">{poll.totalVotes.toString()} participants · read on-chain</p>
+          <p className="mb-4 text-sm text-slate-400">{poll.totalVotes.toString()} participant{poll.totalVotes === 1n ? '' : 's'} · read on-chain</p>
           <ResultsChart options={poll.options} counts={poll.voteCounts} total={poll.totalVotes} />
         </div>
         <div className="card space-y-2 text-sm">

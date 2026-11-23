@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { usePolls } from '../hooks';
+import { useNow, usePolls } from '../hooks';
 import { pollStatus, type PollStatus } from '../lib/polls';
 import { PollCard } from '../components/PollCard';
 
@@ -13,7 +13,8 @@ const FILTERS: { value: PollStatus | 'all'; label: string }[] = [
 export function Explore() {
   const { data: polls, error, isLoading } = usePolls();
   const [filter, setFilter] = useState<PollStatus | 'all'>('all');
-  const visible = polls?.filter((p) => filter === 'all' || pollStatus(p) === filter);
+  const now = useNow();
+  const visible = polls?.filter((p) => filter === 'all' || pollStatus(p, now) === filter);
 
   return (
     <div className="space-y-6">

@@ -1,9 +1,10 @@
 import { Link } from 'react-router-dom';
 import { formatDate, pollStatus, type PollWithAddress } from '../lib/polls';
 import { StatusBadge } from './StatusBadge';
+import { useNow } from '../hooks';
 
 export function PollCard({ poll }: { poll: PollWithAddress }) {
-  const status = pollStatus(poll);
+  const status = pollStatus(poll, useNow());
   return (
     <Link
       to={`/polls/${poll.address}`}
