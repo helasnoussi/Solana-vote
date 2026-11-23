@@ -15,6 +15,11 @@ results are stored on-chain and can be read by anyone without trusting a central
 | **security.txt** | Embedded in the program ([SECURITY.md](SECURITY.md)) |
 | **Frontend** | React 19 · TypeScript · Vite · Tailwind CSS · `@solana/kit` · Wallet Standard |
 
+![Poll page: two wallets voted, live on-chain results](docs/screenshots/poll-results.png)
+
+*A poll on Devnet after two different wallets voted: each wallet sees its own vote, results are read
+directly from the `Poll` account, and every transaction links to Solana Explorer.*
+
 ---
 
 ## Table of contents
@@ -381,5 +386,6 @@ test result: ok. 4 passed  (close_poll)
 - [x] React + TypeScript frontend: wallet connection, poll list, create, vote, results chart, voting history
 - [x] End-to-end test of the frontend with a wallet on Devnet (create, vote, one-vote-per-wallet, automatic end)
 - [x] Demo transactions on Devnet with several wallets
-- [ ] Screenshots and demo video
+- [x] Screenshots
+- [ ] Demo video
 - [ ] Verified build (`solana-verify`, requires a public repository)
