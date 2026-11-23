@@ -45,7 +45,7 @@ results are stored on-chain and can be read by anyone without trusting a central
 | Automatic refusal of votes after the deadline | ✅ |
 | Deployment on Devnet | ✅ |
 | `security.txt` embedded in the program | ✅ |
-| React frontend: wallet connection, create, vote, results chart, voting history | ✅ implemented — end-to-end wallet testing in progress |
+| React frontend: wallet connection, create, vote, results chart, voting history | ✅ tested end-to-end with Phantom on Devnet |
 
 ---
 
@@ -272,6 +272,12 @@ anchor program deploy --provider.cluster devnet
 solana program show 6oDhsVkgdj2H7eoR9qQdVAXNm2oCszVWgYQfF5vg6SG7
 ```
 
+> **Notes on `anchor build`**
+> - With Anchor 1.x, `anchor build` also compiles the crate in `test` profile and runs it to generate the IDL —
+>   the `Running tests/...` lines in the output are expected.
+> - A warning such as *"The latest cargo build-sbf platform-tools (v1.58) is not installed"* is harmless;
+>   install them with `cargo build-sbf --tools-version v1.58 --install-only` to silence it.
+
 Redeploying with the same program keypair (`target/deploy/solana_vote-keypair.json`, never committed)
 upgrades the program **at the same address**.
 
@@ -288,7 +294,7 @@ A single-page app that talks directly to Solana Devnet — no backend.
 | **Dashboard** | Number of polls, open polls, total votes, latest polls |
 | **Explore** | All polls with an *Open / Ended / Closed* filter |
 | **Create** | Form (title, description, 2–10 options, end date) with the same size limits as the program |
-| **Poll** | Pick an option and vote, see your own vote, live results chart, *Close poll* for the creator, Explorer links |
+| **Poll** | Pick an option and vote, see your own vote, live results chart, *Close poll* for the creator (while the poll is open), Explorer links |
 | **My votes** | Voting history of the connected wallet |
 
 Every transaction shows a pending state, then a link to Solana Explorer on success, or a readable error
@@ -305,6 +311,7 @@ A permanent **Devnet** badge is displayed in the header.
 | Listing polls | `getProgramAccounts` filtered on the `Poll` discriminator (first 8 bytes) |
 | Listing a wallet's votes | `getProgramAccounts` filtered on the `VoteRecord` discriminator + the voter address (offset 40) |
 | Caching / refresh | SWR, refreshed every 15 s and after each transaction |
+| Poll status | Computed client-side from `is_active` and `end_time` with a 1 s clock (`useNow`), so a poll switches from *Open* to *Ended* exactly at its deadline without a reload |
 | Charts | Recharts |
 
 ### Run it
@@ -314,6 +321,8 @@ cd app
 npm install
 npm run dev          # http://localhost:5173
 ```
+
+The frontend lives in `app/`: run npm commands from there (or use `npm --prefix app run dev` from the repo root).
 
 Set your wallet to **Devnet** (in Phantom: *Settings → Developer settings → Testnet mode → Solana Devnet*)
 and fund it from https://faucet.solana.com.
@@ -370,7 +379,7 @@ test result: ok. 4 passed  (close_poll)
 - [x] Deployment on Devnet with on-chain IDL
 - [x] `security.txt` embedded in the program
 - [x] React + TypeScript frontend: wallet connection, poll list, create, vote, results chart, voting history
-- [ ] End-to-end test of the frontend with a wallet on Devnet
-- [ ] Demo transactions on Devnet (create a poll, vote with several wallets)
+- [x] End-to-end test of the frontend with a wallet on Devnet (create, vote, one-vote-per-wallet, automatic end)
+- [x] Demo transactions on Devnet with several wallets
 - [ ] Screenshots and demo video
 - [ ] Verified build (`solana-verify`, requires a public repository)
