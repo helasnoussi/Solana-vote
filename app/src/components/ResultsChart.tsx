@@ -1,15 +1,27 @@
+import { memo, useMemo } from 'react';
 import { Bar, BarChart, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { percent } from '../lib/polls';
 
 const COLORS = ['#8b5cf6', '#14b8a6', '#f59e0b', '#ec4899', '#3b82f6', '#22c55e', '#ef4444', '#a855f7', '#06b6d4', '#eab308'];
 
-/** Horizontal bar chart of the votes per option. */
-export function ResultsChart({ options, counts, total }: { options: string[]; counts: bigint[]; total: bigint }) {
-  const data = options.map((name, i) => ({
-    name,
-    votes: Number(counts[i] ?? 0n),
-    pct: percent(counts[i] ?? 0n, total),
-  }));
+type Props = { options: string[]; counts: bigint[]; total: bigint };
+
+/**
+ * Horizontal bar chart of the votes per option.
+ * Memoized: the poll page re-renders every second (live status clock), and a new `data`
+ * array would make Recharts replay its bar animation and hide the labels each time.
+ * SWR keeps `options` / `counts` referentially stable while the on-chain data is unchanged.
+ */
+export const ResultsChart = memo(function ResultsChart({ options, counts, total }: Props) {
+  const data = useMemo(
+    () =>
+      options.map((name, i) => ({
+        name,
+        votes: Number(counts[i] ?? 0n),
+        pct: percent(counts[i] ?? 0n, total),
+      })),
+    [options, counts, total],
+  );
 
   return (
     <div style={{ height: Math.max(160, data.length * 48) }}>
@@ -31,4 +43,4 @@ export function ResultsChart({ options, counts, total }: { options: string[]; co
       </ResponsiveContainer>
     </div>
   );
-}
+});
