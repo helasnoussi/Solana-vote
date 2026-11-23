@@ -13,6 +13,7 @@ results are stored on-chain and can be read by anyone without trusting a central
 | **IDL** | Published on-chain (Program Metadata) |
 | **Tests** | 18 passing (LiteSVM) |
 | **security.txt** | Embedded in the program ([SECURITY.md](SECURITY.md)) |
+| **Verified build** | ✅ Reproducible build matches the Devnet program ([details](#verified-build)) |
 | **Frontend** | React 19 · TypeScript · Vite · Tailwind CSS · `@solana/kit` · Wallet Standard |
 
 ![Poll page: two wallets voted, live on-chain results](docs/screenshots/poll-results.png)
@@ -32,6 +33,7 @@ directly from the `Poll` account, and every transaction links to Solana Explorer
 6. [Design choices and limitations](#design-choices-and-limitations)
 7. [Project structure](#project-structure)
 8. [Getting started](#getting-started)
+   - [Verified build](#verified-build)
 9. [Frontend](#frontend)
 10. [Tests](#tests)
 11. [Roadmap](#roadmap)
@@ -50,6 +52,7 @@ directly from the `Poll` account, and every transaction links to Solana Explorer
 | Automatic refusal of votes after the deadline | ✅ |
 | Deployment on Devnet | ✅ |
 | `security.txt` embedded in the program | ✅ |
+| Verified (reproducible) build | ✅ |
 | React frontend: wallet connection, create, vote, results chart, voting history | ✅ tested end-to-end with Phantom on Devnet |
 
 ---
@@ -288,6 +291,44 @@ upgrades the program **at the same address**.
 
 ---
 
+### Verified build
+
+The program deployed on Devnet is built with [`solana-verify`](https://github.com/Ellipsis-Labs/solana-verifiable-build)
+in the official Docker image, so anyone can rebuild it from this repository and get the **exact same binary**.
+
+| | |
+|---|---|
+| Build image | `solanafoundation/solana-verifiable-build:4.1.2` |
+| Verified commit | [`125a86c`](https://github.com/helasnoussi/Solana-vote/commit/125a86c35edd64ae3ed6118a78b3119b2a464b67) |
+| Program hash | `3ecda4a239e128b9bbe69db1b8d79e2e260bc48fdb220147fa26335e801bfc16` |
+| On-chain verification PDA | [`5QXeye2JL1dBEoPjsmCMqN3bS9ZpdAm5Y7cx3JL1pkY`](https://explorer.solana.com/address/5QXeye2JL1dBEoPjsmCMqN3bS9ZpdAm5Y7cx3JL1pkY?cluster=devnet) (repo URL, commit and build args, written by the upgrade authority) |
+
+Verify it yourself (requires Docker and `cargo install solana-verify`):
+
+```bash
+# hash of the program currently deployed
+solana-verify get-program-hash -u devnet 6oDhsVkgdj2H7eoR9qQdVAXNm2oCszVWgYQfF5vg6SG7
+
+# rebuild from GitHub and compare -> "Program hash matches ✅"
+solana-verify verify-from-repo -u devnet \
+  --program-id 6oDhsVkgdj2H7eoR9qQdVAXNm2oCszVWgYQfF5vg6SG7 \
+  --commit-hash 125a86c35edd64ae3ed6118a78b3119b2a464b67 \
+  --library-name solana_vote \
+  -b solanafoundation/solana-verifiable-build:4.1.2 \
+  https://github.com/helasnoussi/Solana-vote
+```
+
+To deploy a new version that stays verifiable, build it in the container instead of with `anchor build`:
+
+```bash
+solana-verify build --library-name solana_vote -b solanafoundation/solana-verifiable-build:4.1.2
+solana program deploy target/deploy/solana_vote.so \
+  --program-id target/deploy/solana_vote-keypair.json -u devnet
+```
+
+> The OtterSec "Verified" badge shown by Solana Explorer / Solscan is only issued for **mainnet** programs
+> (`--remote` verification). On Devnet, the proof is the reproducible build above plus the on-chain verification PDA.
+
 ### Example: a vote on Devnet
 
 A real `vote` transaction sent from the frontend by a second wallet
@@ -397,4 +438,4 @@ test result: ok. 4 passed  (close_poll)
 - [x] End-to-end test of the frontend with a wallet on Devnet (create, vote, one-vote-per-wallet, automatic end)
 - [x] Demo transactions on Devnet with several wallets
 - [x] Screenshots
-- [ ] Verified build (`solana-verify`, requires a public repository)
+- [x] Verified build (`solana-verify`, reproducible build matching the Devnet program)
