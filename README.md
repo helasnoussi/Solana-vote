@@ -288,6 +288,16 @@ upgrades the program **at the same address**.
 
 ---
 
+### Example: a vote on Devnet
+
+A real `vote` transaction sent from the frontend by a second wallet
+([view on Solana Explorer](https://explorer.solana.com/tx/6YCBa4n9MSa64EjT96nNkprDfNCpYoU9YkNwM32BcxiDRmrAs6aS9UgHY4ctQ4J5sAfRCcWqeGurV7SdHMLMkrB?cluster=devnet)):
+finalized, ~13.5k compute units, 332 bytes, fee ≈ 0.00001 SOL (plus ≈ 0.0011 SOL of rent for the `VoteRecord`).
+
+![Vote transaction on Solana Explorer](docs/screenshots/explorer-vote-tx.png)
+
+---
+
 ## Frontend
 
 A single-page app that talks directly to Solana Devnet — no backend.
