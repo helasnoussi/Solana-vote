@@ -397,5 +397,4 @@ test result: ok. 4 passed  (close_poll)
 - [x] End-to-end test of the frontend with a wallet on Devnet (create, vote, one-vote-per-wallet, automatic end)
 - [x] Demo transactions on Devnet with several wallets
 - [x] Screenshots
-- [ ] Demo video
 - [ ] Verified build (`solana-verify`, requires a public repository)
